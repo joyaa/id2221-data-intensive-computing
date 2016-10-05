@@ -29,24 +29,21 @@ object KafkaWordCount {
     val messages = KafkaUtils.createStream[String, String, DefaultDecoder, StringDecoder](ssc, kafkaConf) //?????????+
     //val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](<FILL IN>)
 
-    val values = messages.map(_._2) //save the value part of the typle
+    val values = messages.map(_._2) //save the value part of the tuple
     val pairs = values.map((_.split(",")(0), _(1))) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
 
 
-    def mappingFunc(key: String, value: Option[Double], state: State[Double]): Option[(String, Double)] = {
-/* Förstår ej vad som ska beräknas och vad som finns sparat i state.
+    def mappingFunc(key: String, value: Option[Double], state: Tuple2[Double,Int]): Option[(Double)] = {
       if (state.exists) {
-
-  	     state = state*
-         val counter = counter + 1
-
+        val sum = state._1 + value
+        val counter = state._2 + 1
       } else {
-        val initialState = ...
-        state.update(initialState)  // Set the initial state
+        val sum = value
+        val counter = 1
       }
-      state.update(average)
-       return (sum / counter)
-*/
+
+      state.update(new Tuple2(sum, counter))
+      return (sum / counter)
     }
 
     val stateDstream = pairs.mapWithState(StateSpec.function(mappingFunc)) //Osäkert
