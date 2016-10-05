@@ -133,5 +133,3 @@
 [0m[[0mdebug[0m] [0m	Thread run-main-0 exited.[0m
 [0m[[0mdebug[0m] [0mWaiting for thread Thread-1 to terminate.[0m
 [0m[[0mdebug[0m] [0m	Thread Thread-1 exited.[0m
-[0m[[0mdebug[0m] [0mInterrupting remaining threads (should be all daemons).[0m
-[0m[[0mdebug[0m] [0mInterrupting thread New I/O worker #5[0m

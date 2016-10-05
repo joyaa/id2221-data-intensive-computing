@@ -29,8 +29,8 @@ object KafkaWordCount {
     val messages = KafkaUtils.createStream[String, String, StringDecoder, StringDecoder](ssc, kafkaConf, Map("avg" -> 1), StorageLevel.MEMORY_ONLY_SER) //?????????
     //val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](<FILL IN>)
 
-    val values = messages.map(_._2) //save the value part of the tuple
-    val pairs = values.map(x => (x.split(",")(0), x(1).toInt)) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
+    val values = messages.map(_._2.split(",") )//save the value part of the tuple
+    val pairs = values.map(x => (x(0), x(1).toInt)) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
 
 
     def mappingFunc(key: String, value: Option[Int], state: State[Tuple2[Int,Int]]): Option[(Double)] = {
