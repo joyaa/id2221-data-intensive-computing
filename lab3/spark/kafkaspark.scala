@@ -6,7 +6,7 @@ import org.apache.spark.streaming.kafka._
 import org.apache.spark.storage.StorageLevel
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
-import kafka.serializer.{DefaultDecoder, StringDecoder}
+import _root_.kafka.serializer.{DefaultDecoder, StringDecoder}
 
 object KafkaWordCount {
   def main(args: Array[String]) {
@@ -26,27 +26,32 @@ object KafkaWordCount {
 
     // if you want to try the receiver-less approach, comment the below line and uncomment the next one
     //https://spark.apache.org/docs/1.3.0/api/java/index.html?org/apache/spark/streaming/kafka/KafkaUtils.html
-    val messages = KafkaUtils.createStream[String, String, DefaultDecoder, StringDecoder](ssc, kafkaConf) //?????????+
+    val messages = KafkaUtils.createStream[String, String, StringDecoder, StringDecoder](ssc, kafkaConf, Map("avg" -> 1), StorageLevel.MEMORY_ONLY_SER) //?????????
     //val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](<FILL IN>)
 
     val values = messages.map(_._2) //save the value part of the tuple
-    val pairs = values.map((_.split(",")(0), _(1))) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
+    val pairs = values.map(x => (x.split(",")(0), x(1).toInt)) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
 
 
-    def mappingFunc(key: String, value: Option[Double], state: Tuple2[Double,Int]): Option[(Double)] = {
+    def mappingFunc(key: String, value: Option[Int], state: State[Tuple2[Int,Int]]): Option[(Double)] = {
       if (state.exists) {
-        val sum = state._1 + value
-        val counter = state._2 + 1
-      } else {
-        val sum = value
-        val counter = 1
-      }
+        val existingState = state.get
 
-      state.update(new Tuple2(sum, counter))
-      return (sum / counter)
+        val sum = existingState._1 + value.getOrElse(0)
+        val counter = existingState._2 + 1
+
+        state.update(new Tuple2(sum, counter))
+        return Option((sum / counter).toDouble)
+
+      } else {
+
+        val sum = value.getOrElse(0)
+        state.update(new Tuple2(sum, 1))
+        return Option(sum.toDouble)
+      }
     }
 
-    val stateDstream = pairs.mapWithState(StateSpec.function(mappingFunc)) //Osäkert
+    val stateDstream = pairs.mapWithState(StateSpec.function(mappingFunc _)) //Osäkert
 
     stateDstream.print()
     ssc.start()
