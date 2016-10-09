@@ -130,6 +130,3 @@
 [0m[[0mdebug[0m] [0m	/home/joy/.ivy2/cache/org.apache.kafka/kafka-clients/jars/kafka-clients-0.8.2.1.jar[0m
 [0m[[0mdebug[0m] [0m	/home/joy/.ivy2/cache/com.101tec/zkclient/jars/zkclient-0.3.jar[0m
 [0m[[0mdebug[0m] [0mWaiting for thread run-main-0 to terminate.[0m
-[0m[[0mdebug[0m] [0m	Thread run-main-0 exited.[0m
-[0m[[0mdebug[0m] [0mWaiting for thread Thread-1 to terminate.[0m
-[0m[[0mdebug[0m] [0m	Thread Thread-1 exited.[0m

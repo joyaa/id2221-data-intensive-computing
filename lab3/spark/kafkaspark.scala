@@ -33,21 +33,22 @@ object KafkaWordCount {
     val pairs = values.map(x => (x(0), x(1).toInt)) //DUBBELKOLLA, https://www.safaribooksonline.com/library/view/learning-spark/9781449359034/ch04.html
 
 
-    def mappingFunc(key: String, value: Option[Int], state: State[Tuple2[Int,Int]]): Option[(Double)] = {
+    def mappingFunc(key: String, value: Option[Int], state: State[Map[String, Tuple2[Int,Int]]]): Option[(String, Double)] = {
       if (state.exists) {
         val existingState = state.get
 
-        val sum = existingState._1 + value.getOrElse(0)
-        val counter = existingState._2 + 1
+        val existingValue = existingState(key)
 
-        state.update(new Tuple2(sum, counter))
-        return Option((sum / counter).toDouble)
+        val sum = existingValue._1 + value.getOrElse(0)
+        val counter = existingValue._2 + 1
+
+        state.update(existingState + (key -> new Tuple2(sum, counter)))
+        return Option(key, (sum / counter).toDouble)
 
       } else {
-
         val sum = value.getOrElse(0)
-        state.update(new Tuple2(sum, 1))
-        return Option(sum.toDouble)
+        state.update(Map(key -> new Tuple2(sum, 1)))
+        return Option(key,sum.toDouble)
       }
     }
 

@@ -33,4 +33,3 @@ object SGen {
 
   val alphabet = 'a' to 'z'
 }
-
